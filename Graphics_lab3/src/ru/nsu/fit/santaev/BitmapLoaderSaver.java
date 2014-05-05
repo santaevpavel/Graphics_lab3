@@ -5,8 +5,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +17,10 @@ import java.io.ObjectInputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.Buffer;
 import java.util.ArrayList;
+
+import javax.imageio.plugins.bmp.BMPImageWriteParam;
+
+import org.omg.CORBA.OMGVMCID;
 
 public class BitmapLoaderSaver {
 
@@ -24,11 +31,6 @@ public class BitmapLoaderSaver {
 		// ObjectInputStream ois = new ObjectInputStream(fis);
 		DataInputStream ois = new DataInputStream(fis);
 		img.header.bfType = ois.readShort();
-		// long myInt = ((long) ois.readUnsignedShort()) * 8 * 8 + ((long)
-		// ois.readUnsignedShort());
-		// 905970432
-		// long b = ((long)ois.read()) << 24 + ((long)ois.read()) << 16 +
-		// ((long)ois.read()) << 8 + (long)ois.read();
 		img.header.bfSize = Integer.reverseBytes(ois.readInt());
 		img.header.bfReserved1 = ois.readShort();
 		img.header.bfReserved2 = ois.readShort();
@@ -110,7 +112,54 @@ public class BitmapLoaderSaver {
 				| thirdByte << 8 | fourthByte)) & 0xFFFFFFFFL;
 		return anUnsignedInt;
 	}
+	public static void saveBmpFile(String filename, Bitmap imgOld, BufferedImage imgNew) throws IOException{
+		File f = new File(filename);
+		//FileInputStream fis = new FileInputStream(f);
+		FileOutputStream fos = new FileOutputStream(f);
+		//DataInputStream ois = new DataInputStream(fis);
+		DataOutputStream ois = new DataOutputStream(fos);
+		//ois.writeShort(img.header.bfType);
+		ois.writeShort(imgOld.header.bfType);
+		ois.writeInt(Integer.reverseBytes((int) imgNew.getHeight() * imgNew.getWidth() * 24 + 54));
+		ois.writeShort(imgOld.header.bfReserved1);
+		ois.writeShort(imgOld.header.bfReserved2);
 
+		//ois.writeInt(Integer.reverseBytes((int) img.header.bfOffBits));
+		ois.writeInt(Integer.reverseBytes(54));
+		
+		ois.writeInt((int) imgOld.infoHeader.biSize);
+		ois.writeInt(Integer.reverseBytes(imgNew.getWidth()));
+		ois.writeInt(Integer.reverseBytes(imgNew.getHeight()));
+		ois.writeShort(imgOld.infoHeader.biPlanes);
+		ois.writeShort(imgOld.infoHeader.biBitCount);
+		ois.writeInt((int)imgOld.infoHeader.biCompression);
+		ois.writeInt((int)imgNew.getHeight() * imgNew.getWidth() * 24);
+		ois.writeInt(imgOld.infoHeader.biXPelsPerMeter);
+		ois.writeInt(imgOld.infoHeader.biYPelsPerMeter);
+		ois.writeInt((int)imgOld.infoHeader.biClrUsed);
+		ois.writeInt((int)imgOld.infoHeader.biClrImportant);
+		
+		//byte[] pixel = new byte[img.height * img.width * 24];
+		//int offset = ois.size();
+		//ois.
+		
+		for (int i = 0; i < imgNew.getHeight(); i++) {
+			for (int j = 0; j < imgNew.getWidth(); j++) {
+				int color = imgNew.getRGB(j, imgNew.getHeight() - i - 1);
+				Color c = new Color(color);
+				int b = c.getBlue();
+				int g = c.getGreen();
+				int r = c.getRed();
+				//img.pixels.setRGB(j, img.height - i - 1, color);
+				ois.write(b);
+				ois.write(g);
+				ois.write(r);
+			}
+		}
+		ois.close();
+		
+	}
+	
 	/*
 	 * public static BufferedImage toBufferedImage256(Bitmap b) { BufferedImage
 	 * img = new BufferedImage(256, 256, BufferedImage.TYPE_3BYTE_BGR); for (int

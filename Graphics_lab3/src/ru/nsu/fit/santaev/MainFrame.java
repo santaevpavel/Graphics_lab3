@@ -431,7 +431,7 @@ public class MainFrame extends JFrame {
 				gr.drawLine(rect.x, rect.y + rect.height, rect.x + rect.width, rect.y + rect.height);
 			}
 
-			log("Update!! " + getImg().getWidth());
+			//log("Update!! " + getImg().getWidth());
 			//graph.drawLine(0, 0, 100, 100);
 			
 			

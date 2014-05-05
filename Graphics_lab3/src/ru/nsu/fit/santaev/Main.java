@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
@@ -15,11 +16,15 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EventObject;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -41,7 +46,6 @@ public class Main {
 
 		private JSlider sliderZoom = null;
 		private JSlider sliderMove = null;
-
 		private JButton defaultButton = null;
 
 		private JPanel panel = new JPanel();
@@ -55,7 +59,7 @@ public class Main {
 					mainFrame.getLocation().y);
 			JTextField text1 = new JTextField("Zoom step");
 			JTextField text2 = new JTextField("Move step");
-
+				
 			defaultButton = new JButton();
 			defaultButton.setText("Set default params");
 
@@ -86,11 +90,12 @@ public class Main {
 	private static BufferedImage imgResized = null;
 	private static BufferedImage imgFiltered = null;
 	private static BufferedImage imgBig = null;
-
+	private static Bitmap bmp = null;
+	private static MyFileChooser fileChooser = null;
 	public static void main(String[] args) throws IOException {
 
 		final MySettings settingsFrame = new MySettings("Settings");
-
+		
 		ImageIcon iconNew = new ImageIcon("res/images/draw_square.png");
 
 		Action actionDrawSquare = new AbstractAction("New", iconNew) {
@@ -117,10 +122,35 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//imgFiltered = GaussBlur.doFilter(imgResized);
+				// imgFiltered = GaussBlur.doFilter(imgResized);
 				imgFiltered = GaussBlur.doFilter(imgResized);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconSave = new ImageIcon("res/images/save_file.png");
+		Action save = new AbstractAction("New", iconSave) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				try {
+					BitmapLoaderSaver.saveBmpFile("res/savedBmp.bmp", bmp,
+							imgResized);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		ImageIcon iconOpen = new ImageIcon("res/images/new_file.png");
+		Action open = new AbstractAction("New", iconOpen) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				fileChooser.setVisible(true);
 			}
 		};
 		blur.putValue("tip", "Размытие по Гауссу");
@@ -181,98 +211,31 @@ public class Main {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int x = e.getX();
-				int y = e.getY();
-				int maxSize = Math.max(imgBig.getHeight(), imgBig.getWidth());
-				int xWidth = 0;
-				int yHeight = 0;
-				if (imgBig.getHeight() > imgBig.getWidth()){
-					yHeight = 256;
-					xWidth = (int) ((double)imgBig.getWidth() / imgBig.getHeight() * 256);
-				}else{
-					xWidth = 256;
-					yHeight = (int) ((double)imgBig.getHeight() / imgBig.getWidth() * 256);
-				}
-				int width = (int)(256f / maxSize * 256);
-				int xRect = x - width / 2;
-				int yRect = y - width / 2;
-				if (xRect < 0){
-					xRect = 0;
-				}
-				if (yRect < 0){
-					yRect = 0;
-				}
-				if (xRect + width >= xWidth){
-					xRect = xWidth - 1 - width;
-				}
-				if (yRect + width >= yHeight){
-					yRect = yHeight - 1 - width;
-				}
-
-				imgResized = imgBig.getSubimage((int)((double)xRect * imgBig.getWidth() / 256),
-						(int)((double)yRect / 256 * imgBig.getHeight()), 256, 256);
-				
-				mainFrame.drawRect(true, new Rectangle(xRect, yRect , width, width));
-				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
-				mainFrame.repaint();
-				System.out.println("Mouse clicked");
+				onMouseEvent(e);
 			}
 		}, new MouseMotionListener() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				int x = e.getX();
-				int y = e.getY();
-				int maxSize = Math.max(imgBig.getHeight(), imgBig.getWidth());
-				int xWidth = 0;
-				int yHeight = 0;
-				if (imgBig.getHeight() > imgBig.getWidth()){
-					yHeight = 256;
-					xWidth = (int) ((double)imgBig.getWidth() / imgBig.getHeight() * 256);
-				}else{
-					xWidth = 256;
-					yHeight = (int) ((double)imgBig.getHeight() / imgBig.getWidth() * 256);
-				}
-				int width = (int)(256f / maxSize * 256);
-				int xRect = x - width / 2;
-				int yRect = y - width / 2;
-				if (xRect + width >= xWidth){
-					xRect = xWidth - 1 - width;
-				}
-				if (yRect + width >= yHeight){
-					yRect = yHeight - 1 - width;
-				}
-				if (xRect < 0){
-					xRect = 0;
-				}
-				if (yRect < 0){
-					yRect = 0;
-				}
-				
-				imgResized = imgBig.getSubimage((int)((double)xRect * imgBig.getWidth() / xWidth),
-						(int)((double)yRect / (yHeight) * imgBig.getHeight()), 256, 256);
-				
-				mainFrame.drawRect(true, new Rectangle(xRect, yRect , width, width));
-				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
-				mainFrame.repaint();
-				System.out.println(" " + ((double)yRect / 256) 
-						+ " " + ((double)(yRect + width) / 256));
+				onMouseEvent(e);
 			}
 		});
 
 		mainFrame.addSeparatorToToolbar();
 		mainFrame.addButtonToToolbar(settings);
+		mainFrame.addButtonToToolbar(save);
 		mainFrame.addButtonToToolbar(blur);
 		mainFrame.addButtonToToolbar(apply);
+		mainFrame.addButtonToToolbar(open);
 		
 		Bitmap bmp = BitmapLoaderSaver.loadBMP("res/7.bmp");
 		BufferedImage buf = BitmapResizer.getResizeTo256(bmp.pixels);
+		Main.bmp = bmp;
 		// BufferedImage buf2 = GaussBlur.doFilter(buf);
 		imgBig = bmp.pixels;
 		imgOrigin = buf;
@@ -281,7 +244,90 @@ public class Main {
 
 		mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 		mainFrame.repaint();
-		// mainFrame.updateImgs();
 
+		fileChooser = new MyFileChooser();
+		fileChooser.setVisible(true);
+		fileChooser.setFileListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String str = arg0.getSource().toString();
+				int i = str.lastIndexOf("selectedFile=");
+				if (-1 == i){
+					return;
+				}
+				String file = "";
+				i += 13;
+				while(',' != str.charAt(i)){
+					file = file + str.charAt(i);
+					i++;
+				}
+				if (file == ""){
+					fileChooser.setVisible(false);
+					return;
+				}
+				System.out.println("file =|" + file + "|");
+				Bitmap bmp = null;
+				try {
+					bmp = BitmapLoaderSaver.loadBMP(file);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				BufferedImage buf = BitmapResizer.getResizeTo256(bmp.pixels);
+				Main.bmp = bmp;
+				// BufferedImage buf2 = GaussBlur.doFilter(buf);
+				imgBig = bmp.pixels;
+				imgOrigin = buf;
+				imgResized = buf;
+				imgFiltered = buf;
+
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+				fileChooser.setVisible(false);
+			}
+		});
+
+	}
+
+	public static void onMouseEvent(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		int maxSize = Math.max(imgBig.getHeight(), imgBig.getWidth());
+		int xWidth = 0;
+		int yHeight = 0;
+		if (imgBig.getHeight() > imgBig.getWidth()) {
+			yHeight = 256;
+			xWidth = (int) ((double) imgBig.getWidth() / imgBig.getHeight() * 256);
+		} else {
+			xWidth = 256;
+			yHeight = (int) ((double) imgBig.getHeight() / imgBig.getWidth() * 256);
+		}
+		int width = (int) (256f / maxSize * 256);
+		int xRect = x - width / 2;
+		int yRect = y - width / 2;
+		if (xRect + width >= xWidth) {
+			xRect = xWidth - 1 - width;
+		}
+		if (yRect + width >= yHeight) {
+			yRect = yHeight - 1 - width;
+		}
+		if (xRect < 0) {
+			xRect = 0;
+		}
+		if (yRect < 0) {
+			yRect = 0;
+		}
+
+		imgResized = imgBig.getSubimage(
+				(int) ((double) xRect * imgBig.getWidth() / xWidth),
+				(int) ((double) yRect / (yHeight) * imgBig.getHeight()), 256,
+				256);
+
+		mainFrame.drawRect(true, new Rectangle(xRect, yRect, width, width));
+		mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+		mainFrame.repaint();
+		System.out.println(" " + ((double) yRect / 256) + " "
+				+ ((double) (yRect + width) / 256));
 	}
 }
