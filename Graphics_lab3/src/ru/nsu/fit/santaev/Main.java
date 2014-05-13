@@ -1,8 +1,6 @@
 package ru.nsu.fit.santaev;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -15,25 +13,29 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EventObject;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.transaction.xa.Xid;
+import javax.swing.plaf.SliderUI;
 
+import ru.nsu.fit.santaev.filters.Aquarelle;
+import ru.nsu.fit.santaev.filters.BlackAndWhite;
+import ru.nsu.fit.santaev.filters.DoubleImg;
+import ru.nsu.fit.santaev.filters.Floyd;
 import ru.nsu.fit.santaev.filters.GaussBlur;
-import ru.nsu.fit.santaev.filters.MyFilter;
+import ru.nsu.fit.santaev.filters.Grey;
+import ru.nsu.fit.santaev.filters.Negative;
+import ru.nsu.fit.santaev.filters.OrdDithering;
+import ru.nsu.fit.santaev.filters.Roberts;
+import ru.nsu.fit.santaev.filters.Sobel;
+import ru.nsu.fit.santaev.filters.Stamp;
 
 public class Main {
 
@@ -128,6 +130,171 @@ public class Main {
 				mainFrame.repaint();
 			}
 		};
+		ImageIcon iconNeg = new ImageIcon("res/images/icon_neg.png");
+		Action neg = new AbstractAction("New", iconNeg) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = Negative.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		final FilterSettings bwSettings = new FilterSettings(mainFrame);
+		
+		ImageIcon iconBW = new ImageIcon("res/images/icon_bw.png");
+		Action bw = new AbstractAction("New", iconBW) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				float def = 0.5f;
+				bwSettings.setVisible(true);
+				bwSettings.setChangeListener(new ChangeListener() {
+					
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						int i = bwSettings.slider.getMaximum();
+						int j = bwSettings.slider.getValue();
+						float k = (float) j / i;
+						imgFiltered = BlackAndWhite.doFilter(imgResized, k);
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+					}
+				});
+				imgFiltered = BlackAndWhite.doFilter(imgResized, def);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconGrey = new ImageIcon("res/images/icon_grey.png");
+		Action grey = new AbstractAction("New", iconGrey) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = Grey.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconFloyd = new ImageIcon("res/images/icon_floyd.png");
+		Action floyd = new AbstractAction("New", iconFloyd) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = Floyd.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconOrdDith = new ImageIcon("res/images/icon_orddith.png");
+		Action ordDith = new AbstractAction("New", iconOrdDith) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = OrdDithering.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		final FilterSettings robertSettings = new FilterSettings(mainFrame);
+		
+		ImageIcon iconRobert = new ImageIcon("res/images/icon_robert.png");
+		Action robert = new AbstractAction("New", iconRobert) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				float def = 0.5f;
+				bwSettings.setVisible(true);
+				bwSettings.setChangeListener(new ChangeListener() {
+					
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						int i = bwSettings.slider.getMaximum();
+						int j = bwSettings.slider.getValue();
+						float k = (float) j / i;
+						imgFiltered = Roberts.doFilter(imgResized, k);
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+					}
+				});
+				imgFiltered = Roberts.doFilter(imgResized, def);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconSobel = new ImageIcon("res/images/icon_sobel.png");
+		final FilterSettings sobelSettings = new FilterSettings(mainFrame);
+		Action sobel = new AbstractAction("New", iconSobel) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				float def = 0.5f;
+				bwSettings.setVisible(true);
+				bwSettings.setChangeListener(new ChangeListener() {
+					
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						int i = bwSettings.slider.getMaximum();
+						int j = bwSettings.slider.getValue();
+						float k = (float) j / i;
+						imgFiltered = Sobel.doFilter(imgResized, k);
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+					}
+				});
+				imgFiltered = Sobel.doFilter(imgResized, def);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();;
+			}
+		};
+		ImageIcon iconAqua = new ImageIcon("res/images/icon_aqua.png");
+		Action aqua = new AbstractAction("New", iconAqua) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = Aquarelle.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconDouble = new ImageIcon("res/images/icon_double.png");
+		Action doublef = new AbstractAction("New", iconDouble) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = DoubleImg.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
+		ImageIcon iconStamp = new ImageIcon("res/images/icon_stamp.png");
+		Action stamp = new AbstractAction("New", iconStamp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// imgFiltered = GaussBlur.doFilter(imgResized);
+				imgFiltered = Stamp.doFilter(imgResized);
+				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+				mainFrame.repaint();
+			}
+		};
 		ImageIcon iconSave = new ImageIcon("res/images/save_file.png");
 		Action save = new AbstractAction("New", iconSave) {
 			private static final long serialVersionUID = 1L;
@@ -153,7 +320,7 @@ public class Main {
 				fileChooser.setVisible(true);
 			}
 		};
-		blur.putValue("tip", "Размытие по Гауссу");
+		
 		ImageIcon iconApply = new ImageIcon("res/images/icon_apply.png");
 		Action apply = new AbstractAction("New", iconApply) {
 			private static final long serialVersionUID = 1L;
@@ -166,7 +333,7 @@ public class Main {
 				mainFrame.repaint();
 			}
 		};
-		apply.putValue("tip", "Скопировать 3ю картинку в 2ую");
+		
 		mainFrame.addComponentListener(new ComponentListener() {
 
 			@Override
@@ -230,10 +397,33 @@ public class Main {
 		mainFrame.addButtonToToolbar(settings);
 		mainFrame.addButtonToToolbar(save);
 		mainFrame.addButtonToToolbar(blur);
+		mainFrame.addButtonToToolbar(grey);
+		mainFrame.addButtonToToolbar(neg);
+		mainFrame.addButtonToToolbar(floyd);
+		mainFrame.addButtonToToolbar(ordDith);
+		mainFrame.addButtonToToolbar(bw);
+		mainFrame.addButtonToToolbar(robert);
+		mainFrame.addButtonToToolbar(sobel);
+		mainFrame.addButtonToToolbar(aqua);
+		mainFrame.addButtonToToolbar(doublef);
+		mainFrame.addButtonToToolbar(stamp);
+		
 		mainFrame.addButtonToToolbar(apply);
 		mainFrame.addButtonToToolbar(open);
 		
-		Bitmap bmp = BitmapLoaderSaver.loadBMP("res/7.bmp");
+		apply.putValue("tip", "Скопировать 3ю картинку в 2ую");
+		grey.putValue("tip", "Оттенки серого");
+		neg.putValue("tip", "Негатив");
+		floyd.putValue("tip", "Флойд");
+		ordDith.putValue("tip", "Ordered dithering");
+		bw.putValue("tip", "Черно-белый");
+		robert.putValue("tip", "Роберт");
+		aqua.putValue("tip", "Акварель");
+		doublef.putValue("tip", "Увеличение");
+		stamp.putValue("tip", "Штамп");
+		
+		
+		Bitmap bmp = BitmapLoaderSaver.loadBMP("res/8.bmp");
 		BufferedImage buf = BitmapResizer.getResizeTo256(bmp.pixels);
 		Main.bmp = bmp;
 		// BufferedImage buf2 = GaussBlur.doFilter(buf);
