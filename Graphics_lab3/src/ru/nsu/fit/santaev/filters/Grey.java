@@ -15,7 +15,7 @@ public class Grey {
 			for (int j = 0; j < img2.getHeight(); j++) {
 				int c = img.getRGB(i, j);
 				Color c2 = new Color(c);
-				int sum = (c2.getRed() + c2.getBlue() + c2.getGreen()) / 3;
+				int sum = (int)((0.2126 * c2.getRed() + 0.7152 * c2.getBlue() + 0.0722 * c2.getGreen()));
 				Color newColor = new Color(sum, sum, sum);
 				img2.setRGB(i, j, newColor.getRGB());
 			}

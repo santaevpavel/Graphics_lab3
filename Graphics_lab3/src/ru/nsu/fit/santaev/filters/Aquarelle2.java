@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.ObjectInputStream.GetField;
 
-public class Aquarelle {
+public class Aquarelle2 {
 
 	private static double[][] matrix = new double[3][3]; 
 	private static double norm = 1;
@@ -57,41 +57,8 @@ public class Aquarelle {
 		gr3.setColor(Color.BLACK);
 		gr3.drawRect(0, 0, img.getWidth(), img.getHeight());
 		
-		/*for (int i = 0; i < img.getWidth(); i++){
-			for (int j = 0; j < img.getHeight(); j++){
-				
-				//Color cImg2 = new Color(img2.getRGB(i, j));
-				double r = 0;
-				double g = 0;
-				double b = 0;
-				for (int k = 0; k < 3; k++){
-					for (int l = 0; l < 3; l++){
-						int x = i + k - 1;
-						int y = j + l - 1;
-						if (x < 0){
-							x = 0;
-						}
-						if (x >= img.getWidth()){
-							x = img.getWidth() - 1;
-						}
-						if (y < 0){
-							y = 0;
-						}
-						if (y >= img.getHeight()){
-							y = img.getHeight() - 1;
-						}
-						Color c = new Color(img.getRGB(x, y));
-
-						r += ((double)c.getRed() * matrix[k][l] / norm );
-						g += ((double)c.getGreen() * matrix[k][l] / norm);
-						b += ((double)c.getBlue() * matrix[k][l] / norm);
-					}
-				}
-				
-				img2.setRGB(i, j, new Color((int)r, (int)g, (int)b).getRGB());
-			}
-		}*/
-		img2 = GaussBlur.doFilter(img);
+		
+		img2 = Mediana.doFilter(img);
 		//img2 = GaussBlur.doFilter(img2);
 		for (int i = 0; i < img.getWidth(); i++){
 			for (int j = 0; j < img.getHeight(); j++){
@@ -143,23 +110,7 @@ public class Aquarelle {
 				img3.setRGB(i, j, new Color((int)r, (int)g, (int)b).getRGB());
 			}
 		}
-		for (int i = 0; i < img.getWidth(); i++){
-			for (int j = 0; j < img.getHeight(); j++){
-				Color cImg3 = new Color(img3.getRGB(i, j));
-				f(img3, cImg3, i - 1, j - 1);
-				f(img3, cImg3, i - 1, j );
-				f(img3, cImg3, i - 1, j + 1);
-				
-				f(img3, cImg3, i - 0, j - 1);
-				//f(img3, cImg3, i - 0, j );
-				f(img3, cImg3, i - 0, j + 1);
-				
-				f(img3, cImg3, i + 1, j - 1);
-				f(img3, cImg3, i + 1, j );
-				f(img3, cImg3, i + 1, j + 1);
-				
-			}
-		}
+		
 		return img3;
 	}
 	public static void f(BufferedImage img3, Color cImg3, int i, int j){

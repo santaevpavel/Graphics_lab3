@@ -65,13 +65,13 @@ public class Roberts {
 		return new Color(r, g, b);
 
 	}
-	private static Color subColors(Color c1, Color c2){
+	public static Color subColors(Color c1, Color c2){
 		int r = Math.abs(c1.getRed() - c2.getRed());
 		int g = Math.abs(c1.getGreen() - c2.getGreen());
 		int b = Math.abs(c1.getBlue() - c2.getBlue());
 		return new Color(r, g, b);
 	}
-	private static Color sqrt(Color c1, Color c2m, double k){
+	public static Color sqrt(Color c1, Color c2m, double k){
 		int r = c1.getRed();
 		int g = c1.getGreen();
 		int b = c1.getBlue();
@@ -92,7 +92,7 @@ public class Roberts {
 		}
 		return new Color(r0, g0, b0);
 	}
-	private static Error getError(Color c1, Color c2) {
+	public static Error getError(Color c1, Color c2) {
 		int r = c1.getRed();
 		int g = c1.getGreen();
 		int b = c1.getBlue();
@@ -107,7 +107,7 @@ public class Roberts {
 		
 	}
 
-	private static Color getPixel(BufferedImage img, int x, int y) {
+	public static Color getPixel(BufferedImage img, int x, int y) {
 		if (x < 0) {
 			x = 0;
 		}
@@ -123,7 +123,7 @@ public class Roberts {
 		return new Color(img.getRGB(x, y));
 	}
 
-	private static void setPixel(BufferedImage img, int x, int y, Color c) {
+	public static void setPixel(BufferedImage img, int x, int y, Color c) {
 		if (x < 0) {
 			return;
 		}
@@ -139,7 +139,7 @@ public class Roberts {
 		img.setRGB(x, y, c.getRGB());
 	}
 
-	private static Color addToPixel(Color old, Error er, double k) {
+	public static Color addToPixel(Color old, Error er, double k) {
 		int r = (int) (old.getRed() + er.r * k);
 		int g = (int) (old.getGreen() + er.g * k);
 		int b = (int) (old.getBlue() + er.b * k);

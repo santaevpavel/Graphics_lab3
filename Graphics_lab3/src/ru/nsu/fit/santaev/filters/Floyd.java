@@ -9,7 +9,7 @@ import java.util.Vector;
 
 public class Floyd {
 
-	public static BufferedImage doFilter(BufferedImage img) {
+	public static BufferedImage doFilter(BufferedImage img, int r, int g, int b) {
 		BufferedImage img2 = new BufferedImage(img.getWidth(), img.getHeight(),
 				BufferedImage.TYPE_3BYTE_BGR);
 		// img.getSubimage(0, 0, img.getWidth(), img.getHeight());
@@ -25,7 +25,7 @@ public class Floyd {
 			for (int i = 0; i < img2.getWidth(); i++) {
 				int c = img2.getRGB(i, j);
 				Color c2 = new Color(c);
-				Color c3 = getClosestPixel(c2);
+				Color c3 = getClosestPixel(c2, r, g, b);
 				error = getError(c2, c3);
 				// Color newPixel = getPixel(img2, i, j);
 				setPixel(img2, i, j, c3);
@@ -59,17 +59,26 @@ public class Floyd {
 		return img2;
 	}
 
-	private static Color getClosestPixel(Color c) {
+	private static Color getClosestPixel(Color c, int kr, int kg , int kb) {
 		int r = c.getRed();
 		int g = c.getGreen();
 		int b = c.getBlue();
-		int k = 32;
+		//int k = ;
 		int sum = (r + g + b) / 3;
-
-		r = (r / k) * k;
-		g = (g / k) * k;
-		b = (b / k) * k;
-		for (int i = 0; i < 255; i++) {
+		if (kr == 0){
+			kr = 1;
+		}
+		if (kg == 0){
+			kg = 1;
+		}
+		if (kb == 0){
+			kb = 1;
+		}
+		
+		r = (r / kr) * kr;
+		g = (g / kg) * kg;
+		b = (b / kb) * kb;
+		/*for (int i = 0; i < 255; i++) {
 			int x = (i / 32) * 32;
 			if (Math.abs(x - r) < 4) {
 				r = x;
@@ -80,7 +89,7 @@ public class Floyd {
 			if (Math.abs(x - b) < 4) {
 				b = x;
 			}
-		}
+		}*/
 		return new Color(r, g, b);
 
 	}

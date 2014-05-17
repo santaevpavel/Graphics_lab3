@@ -169,7 +169,7 @@ public class Sobel {
 		
 	}
 
-	private static Color getPixel(BufferedImage img, int x, int y) {
+	public static Color getPixel(BufferedImage img, int x, int y) {
 		if (x < 0) {
 			x = 0;
 		}
@@ -185,7 +185,7 @@ public class Sobel {
 		return new Color(img.getRGB(x, y));
 	}
 
-	private static void setPixel(BufferedImage img, int x, int y, Color c) {
+	public static void setPixel(BufferedImage img, int x, int y, Color c) {
 		if (x < 0) {
 			return;
 		}
@@ -201,7 +201,7 @@ public class Sobel {
 		img.setRGB(x, y, c.getRGB());
 	}
 
-	private static Color addToPixel(Color old, Error er, double k) {
+	public static Color addToPixel(Color old, Error er, double k) {
 		int r = (int) (old.getRed() + er.r * k);
 		int g = (int) (old.getGreen() + er.g * k);
 		int b = (int) (old.getBlue() + er.b * k);

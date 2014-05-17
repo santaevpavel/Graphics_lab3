@@ -26,6 +26,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.SliderUI;
 
 import ru.nsu.fit.santaev.filters.Aquarelle;
+import ru.nsu.fit.santaev.filters.Aquarelle2;
 import ru.nsu.fit.santaev.filters.BlackAndWhite;
 import ru.nsu.fit.santaev.filters.DoubleImg;
 import ru.nsu.fit.santaev.filters.Floyd;
@@ -183,13 +184,40 @@ public class Main {
 			}
 		};
 		ImageIcon iconFloyd = new ImageIcon("res/images/icon_floyd.png");
+		final FilterSettings3 floydSettings = new FilterSettings3(mainFrame, "1 - red 2 - green 3 - blue");
+		//final FilterSettings floydSettings2 = new FilterSettings(mainFrame, "green");
+		//final FilterSettings floydSettings3 = new FilterSettings(mainFrame, "blue");
 		Action floyd = new AbstractAction("New", iconFloyd) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// imgFiltered = GaussBlur.doFilter(imgResized);
-				imgFiltered = Floyd.doFilter(imgResized);
+				float def = 0.5f;
+				
+				ChangeListener cl = new ChangeListener() {
+					
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						int ir = floydSettings.slider.getMaximum();
+						int jr = floydSettings.slider.getValue();
+						int kr = (int)((float) jr / ir * 255);
+						int ig = floydSettings.slider2.getMaximum();
+						int jg = floydSettings.slider2.getValue();
+						int kg = (int)((float) jg / ig * 255);
+						int ib = floydSettings.slider3.getMaximum();
+						int jb = floydSettings.slider3.getValue();
+						int kb = (int)((float) jb / ib * 255);
+						imgFiltered = Floyd.doFilter(imgResized, kr, kg, kb);
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+					}
+				};
+				floydSettings.setChangeListener(cl, cl, cl);
+				floydSettings.setVisible(false);
+				floydSettings.setVisible(true);
+				//floydSettings2.setChangeListener(cl);
+				//floydSettings3.setChangeListener(cl);
+				imgFiltered = Floyd.doFilter(imgResized, 32, 32, 32);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
 			}
@@ -215,20 +243,22 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				float def = 0.5f;
-				bwSettings.setVisible(true);
-				bwSettings.setChangeListener(new ChangeListener() {
+				robertSettings.setVisible(true);
+				robertSettings.setChangeListener(new ChangeListener() {
 					
 					@Override
 					public void stateChanged(ChangeEvent e) {
-						int i = bwSettings.slider.getMaximum();
-						int j = bwSettings.slider.getValue();
+						int i = robertSettings.slider.getMaximum();
+						int j = robertSettings.slider.getValue();
 						float k = (float) j / i;
-						imgFiltered = Roberts.doFilter(imgResized, k);
+						//imgFiltered = Roberts.doFilter(imgResized, k);
+						imgFiltered =  BlackAndWhite.doFilter(Roberts.doFilter(imgResized, 1), k);
 						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 						mainFrame.repaint();
 					}
 				});
-				imgFiltered = Roberts.doFilter(imgResized, def);
+				//imgFiltered = Roberts.doFilter(imgResized, def);
+				imgFiltered =  BlackAndWhite.doFilter(Roberts.doFilter(imgResized, 1), def);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
 			}
@@ -241,20 +271,20 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				float def = 0.5f;
-				bwSettings.setVisible(true);
-				bwSettings.setChangeListener(new ChangeListener() {
+				sobelSettings.setVisible(true);
+				sobelSettings.setChangeListener(new ChangeListener() {
 					
 					@Override
 					public void stateChanged(ChangeEvent e) {
-						int i = bwSettings.slider.getMaximum();
-						int j = bwSettings.slider.getValue();
+						int i = sobelSettings.slider.getMaximum();
+						int j = sobelSettings.slider.getValue();
 						float k = (float) j / i;
-						imgFiltered = Sobel.doFilter(imgResized, k);
+						imgFiltered = BlackAndWhite.doFilter(Sobel.doFilter(imgResized, 1), k);
 						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 						mainFrame.repaint();
 					}
 				});
-				imgFiltered = Sobel.doFilter(imgResized, def);
+				imgFiltered = BlackAndWhite.doFilter(Sobel.doFilter(imgResized, 1), def);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();;
 			}
@@ -266,7 +296,7 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// imgFiltered = GaussBlur.doFilter(imgResized);
-				imgFiltered = Aquarelle.doFilter(imgResized);
+				imgFiltered = Aquarelle2.doFilter(imgResized);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
 			}
@@ -394,7 +424,7 @@ public class Main {
 		});
 
 		mainFrame.addSeparatorToToolbar();
-		mainFrame.addButtonToToolbar(settings);
+		//mainFrame.addButtonToToolbar(settings);
 		mainFrame.addButtonToToolbar(save);
 		mainFrame.addButtonToToolbar(blur);
 		mainFrame.addButtonToToolbar(grey);
