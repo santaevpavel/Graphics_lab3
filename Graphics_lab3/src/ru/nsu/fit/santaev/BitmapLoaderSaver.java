@@ -114,6 +114,7 @@ public class BitmapLoaderSaver {
 	}
 	public static void saveBmpFile(String filename, Bitmap imgOld, BufferedImage imgNew) throws IOException{
 		File f = new File(filename);
+		f.createNewFile();
 		//FileInputStream fis = new FileInputStream(f);
 		FileOutputStream fos = new FileOutputStream(f);
 		//DataInputStream ois = new DataInputStream(fis);

@@ -66,4 +66,8 @@ public class MyFileChooser extends JFrame {
 	public void setFileListener(ActionListener aa) {
 		jFileChooser.addActionListener(aa);
 	}
+	public void setFile(String filename){
+		File f = new File(filename);
+		jFileChooser.setSelectedFile(f);
+	}
 }

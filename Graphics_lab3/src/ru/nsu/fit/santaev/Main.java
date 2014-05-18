@@ -13,11 +13,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Hashtable;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -62,7 +65,7 @@ public class Main {
 					mainFrame.getLocation().y);
 			JTextField text1 = new JTextField("Zoom step");
 			JTextField text2 = new JTextField("Move step");
-				
+
 			defaultButton = new JButton();
 			defaultButton.setText("Set default params");
 
@@ -95,10 +98,12 @@ public class Main {
 	private static BufferedImage imgBig = null;
 	private static Bitmap bmp = null;
 	private static MyFileChooser fileChooser = null;
+	private static BufferedImage copy = null;
+
 	public static void main(String[] args) throws IOException {
 
 		final MySettings settingsFrame = new MySettings("Settings");
-		
+
 		ImageIcon iconNew = new ImageIcon("res/images/draw_square.png");
 
 		Action actionDrawSquare = new AbstractAction("New", iconNew) {
@@ -143,7 +148,15 @@ public class Main {
 				mainFrame.repaint();
 			}
 		};
-		final FilterSettings bwSettings = new FilterSettings(mainFrame);
+		final FilterSettings bwSettings = new FilterSettings(mainFrame,
+				"Black and White");
+		
+		bwSettings.slider.setPaintLabels(true);
+		Hashtable<Integer, JLabel> table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("0"));
+		table.put(50, new JLabel("128"));
+		table.put(100, new JLabel("255"));
+		bwSettings.slider.setLabelTable(table);
 		
 		ImageIcon iconBW = new ImageIcon("res/images/icon_bw.png");
 		Action bw = new AbstractAction("New", iconBW) {
@@ -153,9 +166,29 @@ public class Main {
 			public void actionPerformed(ActionEvent arg0) {
 				// imgFiltered = GaussBlur.doFilter(imgResized);
 				float def = 0.5f;
-				bwSettings.setVisible(true);
+
+				copy = imgFiltered;// copy = imgFiltered.getSubimage(0, 0,
+									// imgFiltered.getWidth(),
+									// imgFiltered.getHeight());
+				bwSettings.cancel.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						imgFiltered = copy;
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+						bwSettings.setVisible(false);
+					}
+				});
+				bwSettings.ok.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						bwSettings.setVisible(false);
+					}
+				});
 				bwSettings.setChangeListener(new ChangeListener() {
-					
+
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						int i = bwSettings.slider.getMaximum();
@@ -166,9 +199,11 @@ public class Main {
 						mainFrame.repaint();
 					}
 				});
+
 				imgFiltered = BlackAndWhite.doFilter(imgResized, def);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
+				bwSettings.setVisible(true);
 			}
 		};
 		ImageIcon iconGrey = new ImageIcon("res/images/icon_grey.png");
@@ -184,42 +219,81 @@ public class Main {
 			}
 		};
 		ImageIcon iconFloyd = new ImageIcon("res/images/icon_floyd.png");
-		final FilterSettings3 floydSettings = new FilterSettings3(mainFrame, "1 - red 2 - green 3 - blue");
-		//final FilterSettings floydSettings2 = new FilterSettings(mainFrame, "green");
-		//final FilterSettings floydSettings3 = new FilterSettings(mainFrame, "blue");
+		final FilterSettings3 floydSettings = new FilterSettings3(mainFrame,
+				"1 - red 2 - green 3 - blue");
+		
+		floydSettings.slider.setPaintLabels(true);
+		table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("red max quality"));
+		table.put(100, new JLabel("min quality"));
+		floydSettings.slider.setLabelTable(table);
+		floydSettings.slider2.setPaintLabels(true);
+		table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("green max quality"));
+		table.put(100, new JLabel("min quality"));
+		floydSettings.slider2.setLabelTable(table);
+		floydSettings.slider3.setPaintLabels(true);
+		table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("blue max quality"));
+		table.put(100, new JLabel("min quality"));
+		floydSettings.slider3.setLabelTable(table);
+		// final FilterSettings floydSettings2 = new FilterSettings(mainFrame,
+		// "green");
+		// final FilterSettings floydSettings3 = new FilterSettings(mainFrame,
+		// "blue");
 		Action floyd = new AbstractAction("New", iconFloyd) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				float def = 0.5f;
-				
+				copy = imgFiltered;// copy = imgFiltered.getSubimage(0, 0,
+									// imgFiltered.getWidth(),
+									// imgFiltered.getHeight());
+				floydSettings.cancel.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						imgFiltered = copy;
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+						floydSettings.setVisible(false);
+					}
+				});
+				floydSettings.ok.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						floydSettings.setVisible(false);
+					}
+				});
 				ChangeListener cl = new ChangeListener() {
-					
+
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						int ir = floydSettings.slider.getMaximum();
 						int jr = floydSettings.slider.getValue();
-						int kr = (int)((float) jr / ir * 255);
+						int kr = (int) ((float) jr / ir * 255);
 						int ig = floydSettings.slider2.getMaximum();
 						int jg = floydSettings.slider2.getValue();
-						int kg = (int)((float) jg / ig * 255);
+						int kg = (int) ((float) jg / ig * 255);
 						int ib = floydSettings.slider3.getMaximum();
 						int jb = floydSettings.slider3.getValue();
-						int kb = (int)((float) jb / ib * 255);
+						int kb = (int) ((float) jb / ib * 255);
 						imgFiltered = Floyd.doFilter(imgResized, kr, kg, kb);
 						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 						mainFrame.repaint();
 					}
 				};
 				floydSettings.setChangeListener(cl, cl, cl);
-				floydSettings.setVisible(false);
-				floydSettings.setVisible(true);
-				//floydSettings2.setChangeListener(cl);
-				//floydSettings3.setChangeListener(cl);
-				imgFiltered = Floyd.doFilter(imgResized, 32, 32, 32);
+
+				// floydSettings2.setChangeListener(cl);
+				// floydSettings3.setChangeListener(cl);
+				imgFiltered = Floyd.doFilter(imgResized, 128, 128, 128);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
+				floydSettings.setVisible(false);
+				floydSettings.setVisible(true);
 			}
 		};
 		ImageIcon iconOrdDith = new ImageIcon("res/images/icon_orddith.png");
@@ -234,8 +308,14 @@ public class Main {
 				mainFrame.repaint();
 			}
 		};
-		final FilterSettings robertSettings = new FilterSettings(mainFrame);
-		
+		final FilterSettings robertSettings = new FilterSettings(mainFrame,
+				"Robert");
+		robertSettings.slider.setPaintLabels(true);
+		table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("0"));
+		table.put(50, new JLabel("128"));
+		table.put(100, new JLabel("255"));
+		robertSettings.slider.setLabelTable(table);
 		ImageIcon iconRobert = new ImageIcon("res/images/icon_robert.png");
 		Action robert = new AbstractAction("New", iconRobert) {
 			private static final long serialVersionUID = 1L;
@@ -243,50 +323,109 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				float def = 0.5f;
-				robertSettings.setVisible(true);
+				copy = imgFiltered;// imgFiltered.getSubimage(0, 0,
+									// imgFiltered.getWidth(),
+									// imgFiltered.getHeight());
+				robertSettings.cancel.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						imgFiltered = copy;
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+						robertSettings.setVisible(false);
+					}
+				});
+				robertSettings.ok.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						robertSettings.setVisible(false);
+					}
+				});
 				robertSettings.setChangeListener(new ChangeListener() {
-					
+
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						int i = robertSettings.slider.getMaximum();
 						int j = robertSettings.slider.getValue();
 						float k = (float) j / i;
-						//imgFiltered = Roberts.doFilter(imgResized, k);
-						imgFiltered =  BlackAndWhite.doFilter(Roberts.doFilter(imgResized, 1), k);
+						// imgFiltered = Roberts.doFilter(imgResized, k);
+						imgFiltered = BlackAndWhite.doFilter(
+								Roberts.doFilter(imgResized, 1), k);
 						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 						mainFrame.repaint();
 					}
 				});
-				//imgFiltered = Roberts.doFilter(imgResized, def);
-				imgFiltered =  BlackAndWhite.doFilter(Roberts.doFilter(imgResized, 1), def);
+
+				// imgFiltered = Roberts.doFilter(imgResized, def);
+				imgFiltered = BlackAndWhite.doFilter(
+						Roberts.doFilter(imgResized, 1), def);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 				mainFrame.repaint();
+				robertSettings.setVisible(true);
 			}
 		};
 		ImageIcon iconSobel = new ImageIcon("res/images/icon_sobel.png");
-		final FilterSettings sobelSettings = new FilterSettings(mainFrame);
+		
+		final FilterSettings sobelSettings = new FilterSettings(mainFrame,
+				"Sobel");
+		
+		sobelSettings.slider.setPaintLabels(true);
+		table = new Hashtable<Integer, JLabel>();
+		table.put(0, new JLabel("0"));
+		table.put(50, new JLabel("128"));
+		table.put(100, new JLabel("255"));
+		sobelSettings.slider.setLabelTable(table);
 		Action sobel = new AbstractAction("New", iconSobel) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				float def = 0.5f;
-				sobelSettings.setVisible(true);
+				copy = imgFiltered;// copy = imgFiltered.getSubimage(0, 0,
+									// imgFiltered.getWidth(),
+									// imgFiltered.getHeight());
+				System.out.println("_________++++");
+				sobelSettings.cancel.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						System.out.println("_________-----");
+						imgFiltered = copy;
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+						sobelSettings.setVisible(false);
+					}
+				});
+				sobelSettings.ok.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						sobelSettings.setVisible(false);
+					}
+				});
 				sobelSettings.setChangeListener(new ChangeListener() {
-					
+
 					@Override
 					public void stateChanged(ChangeEvent e) {
+						System.out.println("__________");
 						int i = sobelSettings.slider.getMaximum();
 						int j = sobelSettings.slider.getValue();
 						float k = (float) j / i;
-						imgFiltered = BlackAndWhite.doFilter(Sobel.doFilter(imgResized, 1), k);
+						imgFiltered = BlackAndWhite.doFilter(
+								Sobel.doFilter(imgResized, 1), k);
 						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
 						mainFrame.repaint();
 					}
 				});
-				imgFiltered = BlackAndWhite.doFilter(Sobel.doFilter(imgResized, 1), def);
+
+				imgFiltered = BlackAndWhite.doFilter(
+						Sobel.doFilter(imgResized, 1), def);
 				mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
-				mainFrame.repaint();;
+				mainFrame.repaint();
+				sobelSettings.setVisible(true);
+
 			}
 		};
 		ImageIcon iconAqua = new ImageIcon("res/images/icon_aqua.png");
@@ -331,14 +470,53 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// imgFiltered = GaussBlur.doFilter(imgResized);
-				try {
-					BitmapLoaderSaver.saveBmpFile("res/savedBmp.bmp", bmp,
-							imgResized);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				//BitmapLoaderSaver.saveBmpFile("res/savedBmp.bmp", bmp,
+				//		imgResized);
+				final MyFileChooser fileChooser = new MyFileChooser();
+				fileChooser.setVisible(true);
+				fileChooser.setFile("res/savedBmp.bmp");
+				fileChooser.setFileListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						String str = arg0.getSource().toString();
+						int i = str.lastIndexOf("selectedFile=");
+						if (-1 == i) {
+							return;
+						}
+						String file = "";
+						i += 13;
+						while (',' != str.charAt(i)) {
+							file = file + str.charAt(i);
+							i++;
+						}
+						if (file == "") {
+							fileChooser.setVisible(false);
+							return;
+						}
+						System.out.println("file =|" + file + "|");
+						//Bitmap bmp = null;
+						try {
+							//bmp = BitmapLoaderSaver.loadBMP(file);
+							BitmapLoaderSaver.saveBmpFile(file, bmp,
+									imgResized);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						BufferedImage buf = BitmapResizer.getResizeTo256(bmp.pixels);
+						Main.bmp = bmp;
+						// BufferedImage buf2 = GaussBlur.doFilter(buf);
+						imgBig = bmp.pixels;
+						imgOrigin = buf;
+						imgResized = buf;
+						imgFiltered = buf;
+
+						mainFrame.setImgs(imgOrigin, imgResized, imgFiltered);
+						mainFrame.repaint();
+						fileChooser.setVisible(false);
+					}
+				});
 			}
 		};
 		ImageIcon iconOpen = new ImageIcon("res/images/new_file.png");
@@ -350,7 +528,7 @@ public class Main {
 				fileChooser.setVisible(true);
 			}
 		};
-		
+
 		ImageIcon iconApply = new ImageIcon("res/images/icon_apply.png");
 		Action apply = new AbstractAction("New", iconApply) {
 			private static final long serialVersionUID = 1L;
@@ -363,7 +541,7 @@ public class Main {
 				mainFrame.repaint();
 			}
 		};
-		
+
 		mainFrame.addComponentListener(new ComponentListener() {
 
 			@Override
@@ -424,7 +602,7 @@ public class Main {
 		});
 
 		mainFrame.addSeparatorToToolbar();
-		//mainFrame.addButtonToToolbar(settings);
+		// mainFrame.addButtonToToolbar(settings);
 		mainFrame.addButtonToToolbar(save);
 		mainFrame.addButtonToToolbar(blur);
 		mainFrame.addButtonToToolbar(grey);
@@ -437,10 +615,10 @@ public class Main {
 		mainFrame.addButtonToToolbar(aqua);
 		mainFrame.addButtonToToolbar(doublef);
 		mainFrame.addButtonToToolbar(stamp);
-		
+
 		mainFrame.addButtonToToolbar(apply);
 		mainFrame.addButtonToToolbar(open);
-		
+
 		apply.putValue("tip", "Скопировать 3ю картинку в 2ую");
 		grey.putValue("tip", "Оттенки серого");
 		neg.putValue("tip", "Негатив");
@@ -451,8 +629,7 @@ public class Main {
 		aqua.putValue("tip", "Акварель");
 		doublef.putValue("tip", "Увеличение");
 		stamp.putValue("tip", "Штамп");
-		
-		
+
 		Bitmap bmp = BitmapLoaderSaver.loadBMP("res/8.bmp");
 		BufferedImage buf = BitmapResizer.getResizeTo256(bmp.pixels);
 		Main.bmp = bmp;
@@ -468,21 +645,21 @@ public class Main {
 		fileChooser = new MyFileChooser();
 		fileChooser.setVisible(true);
 		fileChooser.setFileListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String str = arg0.getSource().toString();
 				int i = str.lastIndexOf("selectedFile=");
-				if (-1 == i){
+				if (-1 == i) {
 					return;
 				}
 				String file = "";
 				i += 13;
-				while(',' != str.charAt(i)){
+				while (',' != str.charAt(i)) {
 					file = file + str.charAt(i);
 					i++;
 				}
-				if (file == ""){
+				if (file == "") {
 					fileChooser.setVisible(false);
 					return;
 				}
@@ -538,7 +715,7 @@ public class Main {
 		if (yRect < 0) {
 			yRect = 0;
 		}
-
+		
 		imgResized = imgBig.getSubimage(
 				(int) ((double) xRect * imgBig.getWidth() / xWidth),
 				(int) ((double) yRect / (yHeight) * imgBig.getHeight()), 256,
